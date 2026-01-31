@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lojera Gjuhësore – Shkruaj Shqip</title>
+<style>
+body {font-family: Arial, sans-serif; background: linear-gradient(to right,#74ebd5,#ACB6E5); margin:0; padding:0;}
+.container {max-width:700px;margin:30px auto;background:white;padding:30px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.2);}
+h1{text-align:center;color:#333;}
+#timer{text-align:center;font-size:1.5em;margin-bottom:20px;color:#333;font-weight:bold;}
+.question p{font-size:1.1em;margin-bottom:10px;}
+.options button{display:block;width:100%;padding:10px;margin:5px 0;border:none;border-radius:5px;background-color:#ACB6E5;color:white;font-size:1em;cursor:pointer;transition:0.2s;}
+.options button:hover{background-color:#4ecdc4;}
+#result{margin-top:20px;font-size:1.3em;text-align:center;color:#333;font-weight:bold;}
+.level-container {display:flex; justify-content:space-around; margin-top:40px;}
+.level {width:150px; height:150px; display:flex; align-items:center; justify-content:center; font-size:1.2em; font-weight:bold; color:white; background:#74ebd5; border-radius:10px; cursor:pointer; transition:0.3s;}
+.level:hover {background:#4ecdc4;}
+@keyframes pulse {0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); }}
+</style>
+</head>
+<body>
+
+<div class="container" id="startPage">
+  <h1>Lojera Gjuhësore – Shkruaj Shqip</h1>
+  <div class="level-container">
+    <div class="level" onclick="startQuiz('easy')">I Lehtë</div>
+    <div class="level" onclick="startQuiz('medium')">Mesatar</div>
+    <div class="level" onclick="startQuiz('hard')">I Vështirë</div>
+  </div>
+</div>
+
+<div class="container" id="quizPage" style="display:none;">
+  <div id="timer">30 sek</div>
+  <div id="quiz"></div>
+  <div id="result"></div>
+</div>
+
+<script>
+// Pyetjet – 60 pyetje, secili ka level: easy, medium, hard
+const allQuestions=[
+  // EASY Drejtshkrim
+  {level:"easy", question:"Cila formë është e saktë?", options:["akoma","akm"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["përshëndetje","hi"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["standard","standart"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["proces","proçes"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["electricist","elektricist"], correctIndex:1},
+  {level:"easy", question:"Cila formë është e saktë?", options:["alkool","alkol"], correctIndex:1},
+  {level:"easy", question:"Cila formë është e saktë?", options:["piano","pjano"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["autobus","autobuz"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["material","materjal"], correctIndex:0},
+  {level:"easy", question:"Cila formë është e saktë?", options:["variant","varjant"], correctIndex:0},
+  // EASY Letërsi
+  {level:"easy", question:"Kush është quajtur 'Homeri shqiptar'?", options:["Naim Frashëri","Gjergj Fishta","Fan Noli","Lasgush Poradeci"], correctIndex:0},
+  {level:"easy", question:"Migjeni njihet si:", options:["poeti i mjerimit","poeti i natyrës","poeti epik","poeti romantik"], correctIndex:0},
+  {level:"easy", question:"Autori i 'Bagëti e Bujqësia' është:", options:["Çajupi","Naim Frashëri","Fishta","De Rada"], correctIndex:0},
+  {level:"easy", question:"'Vargjet e lira' është vepër e:", options:["Migjenit","Lasgush Poradeci","Fan Noli","Ndre Mjeda"], correctIndex:0},
+  {level:"easy", question:"Lasgush Poradeci lidhet më shumë me:", options:["poezinë lirike","poezinë epike","poezinë patriotike","poezinë satirike"], correctIndex:0},
+  {level:"easy", question:"'Lahuta e Malcisë' i përket:", options:["Gjergj Fishtës","Naim Frashërit","Çajupit","Migjenit"], correctIndex:0},
+  {level:"easy", question:"Fan Noli njihet si:", options:["shkrimtar dhe politikan","vetëm poet","vetëm historian","vetëm përkthyes"], correctIndex:0},
+  {level:"easy", question:"Naim Frashëri i përket periudhës:", options:["Rilindjes Kombëtare","Letërsisë moderne","Romantizmit evropian","Realizmit socialist"], correctIndex:0},
+  {level:"easy", question:"Migjeni është pseudonim i:", options:["Millosh Gjergj Nikollës","Gjergj Fishtës","Fan Nolit","Lasgush Poradecit"], correctIndex:0},
+  {level:"easy", question:"Çajupi është autor i:", options:["Baba Tomorri","Andrra e jetës","Mrizi i Zanave","Vargjet e lira"], correctIndex:0},
+
+  // MEDIUM Drejtshkrim
+  {level:"medium", question:"Cila formë është e saktë?", options:["çertifikatë","certifikatë"], correctIndex:1},
+  {level:"medium", question:"Cila formë është e saktë?", options:["koordinatë","kordinatë"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["koridor","korridor"], correctIndex:1},
+  {level:"medium", question:"Cila formë është e saktë?", options:["iluzion","iluzjon"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["milion","miljon"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["ambicie","ambicje"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["higjienë","higjenë"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["zoologjik","zologjik"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["inxhinier","ingjinier"], correctIndex:0},
+  {level:"medium", question:"Cila formë është e saktë?", options:["portier","portjer"], correctIndex:0},
+  // MEDIUM Letërsi
+  {level:"medium", question:"'Mrizi i Zanave' është vepër e:", options:["Migjenit","Fishta","Mjedës","Nolit"], correctIndex:0},
+  {level:"medium", question:"Ndre Mjeda njihet për:", options:["poezinë lirike","romanin historik","dramën","satirën politike"], correctIndex:0},
+  {level:"medium", question:"De Rada i përket letërsisë:", options:["rilindase","moderne","mesjetare","bashkëkohore"], correctIndex:0},
+  {level:"medium", question:"Migjeni përfaqëson:", options:["realizmin kritik","romantizmin","klasicizmin","simbolizmin"], correctIndex:0},
+  {level:"medium", question:"Fan Noli ka përkthyer:", options:["Shekspirin","Homerin","Danten","Servantesin"], correctIndex:0},
+  {level:"medium", question:"'Andrra e jetës' është shkruar nga:", options:["Çajupi","Migjeni","Lasgushi","Ndre Mjeda"], correctIndex:1},
+  {level:"medium", question:"Naim Frashëri ka shkruar edhe:", options:["poezi fetare","romane policore","tregime fantastike","drama moderne"], correctIndex:0},
+  {level:"medium", question:"Gjergj Fishta shkroi kryesisht në:", options:["gegërisht","toskërisht","gjuhë të huaj","latinisht"], correctIndex:0},
+  {level:"medium", question:"Çajupi njihet për:", options:["satirë shoqërore","poezi simboliste","epikë heroike","poezi filozofike"], correctIndex:0},
+  {level:"medium", question:"Lasgush Poradeci lidhet me:", options:["liqenin","malin","detin","fshatin"], correctIndex:0},
+
+  // HARD Drejtshkrim
+  {level:"hard", question:"Cila formë është e saktë?", options:["bashkëautor","bashkautor"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["i paaft","i pa aftë"], correctIndex:1},
+  {level:"hard", question:"Cila formë është e saktë?", options:["lluks","luks"], correctIndex:1},
+  {level:"hard", question:"Cila formë është e saktë?", options:["llogjikë","logjikë"], correctIndex:1},
+  {level:"hard", question:"Cila formë është e saktë?", options:["taracë","tarracë"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["territor","teritor"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["xhandar","gjandar"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["xhiro","gjiro"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["bibliotekë","biblotekë"], correctIndex:0},
+  {level:"hard", question:"Cila formë është e saktë?", options:["akuarium","akuarjum"], correctIndex:0},
+  // HARD Letërsi
+  {level:"hard", question:"Migjeni botoi kryesisht:", options:["poezi","romane","drama","ese"], correctIndex:0},
+  {level:"hard", question:"'Lahuta e Malcisë' është poemë:", options:["epike","lirike","dramatike","satirike"], correctIndex:0},
+  {level:"hard", question:"Naim Frashëri shkroi edhe për:", options:["mitologjinë shqiptare","shkencën","filozofinë moderne","psikologjinë"], correctIndex:0},
+  {level:"hard", question:"Fan Noli ishte edhe:", options:["klerik","piktor","muzikant","arkitekt"], correctIndex:0},
+  {level:"hard", question:"Letërsia e Migjenit trajton kryesisht:", options:["mjerimin shoqëror","bukurinë e natyrës","dashurinë romantike","historinë antike"], correctIndex:0},
+  {level:"hard", question:"Ndre Mjeda është përfaqësues i:", options:["klasicizmit","romantizmit","simbolizmit","realizmit"], correctIndex:0},
+  {level:"hard", question:"Çajupi jetoi kryesisht në:", options:["Shqipëri","Egjipt","Itali","Francë"], correctIndex:0},
+  {level:"hard", question:"Lasgush Poradeci përdor shumë:", options:["simbole","dialog","narracion","humor"], correctIndex:0},
+  {level:"hard", question:"Fishta ishte edhe:", options:["politikan","mjek","arkitekt","ushtarak"], correctIndex:0},
+  {level:"hard", question:"De Rada shkroi kryesisht në:", options:["arbërisht","shqipen standarde","italisht","greqisht"], correctIndex:1}
+];
+
+let questions = [];
+let currentQuestion = 0;
+let score = 0;
+let timer;
+let timeLeft = 30;
+
+const startPage = document.getElementById('startPage');
+const quizPage = document.getElementById('quizPage');
+const quizContainer = document.getElementById('quiz');
+const timerDiv = document.getElementById('timer');
+const resultDiv = document.getElementById('result');
+
+function startQuiz(level){
+  questions = allQuestions.filter(q => q.level===level);
+  currentQuestion = 0;
+  score = 0;
+  startPage.style.display="none";
+  quizPage.style.display="block";
+  showQuestion(currentQuestion);
+}
+
+function showQuestion(qIndex){
+  quizContainer.innerHTML="";
+  timeLeft=30;
+  timerDiv.textContent=timeLeft+" sek";
+  const q=questions[qIndex];
+  const div=document.createElement('div');
+  div.classList.add('question');
+  div.innerHTML=`<p>${qIndex+1}. ${q.question}</p>`;
+  const optionsDiv=document.createElement('div');
+  optionsDiv.classList.add('options');
+  q.options.forEach((option,i)=>{
+    const btn=document.createElement('button');
+    btn.textContent=option;
+    btn.addEventListener('click',()=>{
+      if(optionsDiv.classList.contains('answered')) return;
+      optionsDiv.classList.add('answered');
+      clearInterval(timer);
+      checkAnswer(btn,i,q,optionsDiv);
+    });
+    optionsDiv.appendChild(btn);
+  });
+  div.appendChild(optionsDiv);
+  quizContainer.appendChild(div);
+  timer=setInterval(()=>{
+    timeLeft--;
+    timerDiv.textContent=timeLeft+" sek";
+    if(timeLeft<=0){
+      clearInterval(timer);
+      optionsDiv.classList.add('answered');
+      optionsDiv.children[q.correctIndex].style.backgroundColor='#2ed573';
+      optionsDiv.children[q.correctIndex].style.animation='pulse 0.5s';
+      for(let j=0;j<optionsDiv.children.length;j++){
+        if(j!==q.correctIndex) optionsDiv.children[j].style.backgroundColor='#ff4757';
+      }
+      setTimeout(()=>{nextQuestion();},2000);
+    }
+  },1000);
+}
+
+function checkAnswer(btn,index,q,optionsDiv){
+  if(index===q.correctIndex){
+    btn.style.backgroundColor='#2ed573';
+    btn.style.animation='pulse 0.5s';
+    score++;
+  } else {
+    btn.style.backgroundColor='#ff4757';
+    optionsDiv.children[q.correctIndex].style.backgroundColor='#2ed573';
+    optionsDiv.children[q.correctIndex].style.animation='pulse 0.5s';
+  }
+  setTimeout(()=>{nextQuestion();},1500);
+}
+
+function nextQuestion(){
+  currentQuestion++;
+  if(currentQuestion<questions.length){
+    showQuestion(currentQuestion);
+  } else {
+    quizContainer.innerHTML="";
+    timerDiv.textContent="";
+    resultDiv.textContent=`Rezultati yt: ${score} / ${questions.length}`;
+  }
+}
+</script>
+</body>
+</html>
